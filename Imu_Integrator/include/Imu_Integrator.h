@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <Eigen/Dense>
+#include <chrono>
+#include "spdlog/spdlog.h"
 // #include </home/dygg/armlib/eigen339/include/eigen3/Eigen>
 
 // Custom message includes. Auto-generated from msg/ directory.
@@ -30,7 +32,7 @@ struct ImuMsg
     Orientation orien;
     Position pos;
     */
-   double time;
+   std::chrono::steady_clock::time_point time;
 //    double ax,ay,az,wx,wy,wz;
     Eigen::Vector3d linear_acceleration;
     Eigen::Vector3d angular_velocity;
@@ -51,7 +53,7 @@ class ImuIntegrator
 private:
     Pose pose;
     // ros::Time time;
-    double time;
+    std::chrono::steady_clock::time_point time;
     Eigen::Vector3d gravity;
     Eigen::Vector3d velocity;
     // visualization_msgs::Marker path;

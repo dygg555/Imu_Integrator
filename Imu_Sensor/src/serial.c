@@ -1,7 +1,7 @@
 #include "serial.h"
 
 
-int serial_open(unsigned char* dev, unsigned int baud)
+int serial_open(const char* dev, unsigned int baud)
 {
     int fd;
     fd = open(dev, O_RDWR|O_NOCTTY); 

@@ -31,7 +31,9 @@ void ImuIntegrator::ImuCallback(const ImuMsg &msg) {
     setGravity(msg.linear_acceleration);
     firstT = false;
   } else {
-    deltaT = (msg.time - time);//s
+    // std::chrono::duration duration = (msg.time - time);//s
+    deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(msg.time - time).count();
+    // spdlog::info("deltaT:{}",deltaT);
     time = msg.time;
     calcOrientation(msg.angular_velocity);
     calcPosition(msg.linear_acceleration);
@@ -64,11 +66,22 @@ void ImuIntegrator::calcOrientation(const Eigen::Vector3d &msg) {
   double sigma =
       std::sqrt(std::pow(msg.x(), 2) + std::pow(msg.y(), 2) + std::pow(msg.z(), 2)) *
       deltaT;
+
+  if(std::abs(sigma)< 1e-6)
+  {
+    pose.orien = pose.orien *
+                (Eigen::Matrix3d::Identity() + 0.0 * B +
+                  0.0 * B * B);
+  }
+  else
+  {
+    pose.orien = pose.orien *
+                (Eigen::Matrix3d::Identity() + (std::sin(sigma) / sigma) * B +
+                  ((1 - std::cos(sigma)) / std::pow(sigma, 2)) * B * B);
+  }
   // std::cout << "sigma: " << sigma << std::endl << Eigen::Matrix3d::Identity()
   // + (std::sin(sigma) / sigma) * B << std::endl << pose.orien << std::endl;
-  pose.orien = pose.orien *
-               (Eigen::Matrix3d::Identity() + (std::sin(sigma) / sigma) * B +
-                ((1 - std::cos(sigma)) / std::pow(sigma, 2)) * B * B);
+
 }
 
 void ImuIntegrator::calcPosition(const Eigen::Vector3d &msg) {
@@ -76,7 +89,9 @@ void ImuIntegrator::calcPosition(const Eigen::Vector3d &msg) {
   Eigen::Vector3d acc_g = pose.orien * acc_l;
   // Eigen::Vector3d acc(msg.x - gravity[0], msg.y - gravity[1], msg.z -
   // gravity[2]);
+  // spdlog::warn("*********{}--{}--{}",acc_g.x(),acc_g.y(),acc_g.z());
   velocity = velocity + deltaT * (acc_g - gravity);
+  // spdlog::warn("+++++++++++++{}--{}--{}",velocity.x(),velocity.y(),velocity.z());
   pose.pos = pose.pos + deltaT * velocity;
 }
 

@@ -21,7 +21,7 @@ extern "C" {
 
 void serial_close(int fd);
 
-int serial_open(unsigned char* dev, unsigned int baud);
+int serial_open(const char* dev, unsigned int baud);
 
 int serial_read_data(int fd, unsigned char *val, int len);
 
